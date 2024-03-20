@@ -1,0 +1,24 @@
+package components
+
+
+templ headerComponent(title string) {
+	<head><title>{title}</title></head>
+}
+
+templ contentComponent(title string, body templ.Component) {
+	<h1>{ title }</h1>
+	<article>
+		@body
+	</article>
+}
+
+templ indexPage(index Index) {
+	<html>
+		@headerComponent(index.Title)
+		<body>
+			for _, list := range *index.Lists {
+				<h1>{ list.Name }</h1>
+			}
+		</body>
+	</html>
+}
