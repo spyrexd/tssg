@@ -1,8 +1,6 @@
 package trello
 
 import (
-	"log"
-
 	tc "github.com/adlio/trello"
 	"github.com/spyrexd/tssg/internal/components"
 	"github.com/spyrexd/tssg/internal/config"
@@ -40,18 +38,30 @@ func (c *TrelloClient) GetBoardLists(boardId string) (*[]components.List, error)
 	if err != nil {
 		return nil, err
 	}
+
 	boardLists, err := board.GetLists(tc.Defaults())
-	log.Printf("%v", boardLists)
 	if err != nil {
 		return nil, err
 	}
-	componentLists := make([]components.List, len(boardLists))
 
+	componentLists := make([]components.List, len(boardLists))
 	for idx, item := range boardLists {
 		componentLists[idx] = components.List{item}
 	}
-	log.Printf("%v", componentLists)
 
 	return &componentLists, nil
+}
 
+func (c *TrelloClient) GetCards(list components.List) (*[]components.Card, error) {
+	cards, err := list.GetCards(tc.Defaults())
+	if err != nil {
+		return nil, err
+	}
+
+	componentCards := make([]components.Card, len(cards))
+	for idx, card := range cards {
+		componentCards[idx] = components.Card{card}
+	}
+
+	return &componentCards, nil
 }
