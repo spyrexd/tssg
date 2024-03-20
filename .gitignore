@@ -1,2 +1,3 @@
 .env
 public
+**/*_templ.go
