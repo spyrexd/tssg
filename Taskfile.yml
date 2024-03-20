@@ -1,0 +1,17 @@
+version: '3'
+
+vars:
+  GOPATH:
+    sh: go env GOPATH
+
+tasks:
+  generate:
+    cmds:
+      - "{{.GOPATH}}/bin/templ generate"
+
+  run:
+    deps: [generate]
+    cmds:
+      - go run cmd/tssg/tssg.go
+
+  
