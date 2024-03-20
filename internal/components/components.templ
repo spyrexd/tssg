@@ -1,8 +1,21 @@
 package components
 
+import "github.com/gosimple/slug"
+import "fmt"
 
 templ headerComponent(title string) {
 	<head><title>{title}</title></head>
+}
+
+templ listComponent(list *List) {
+	<html>
+	  @headerComponent(list.List.Name)
+	  <body>
+		 for _, card := range *list.Cards {
+			<div><a href={ templ.SafeURL(fmt.Sprintf("%s.html", slug.Make(card.Name))) }>{ card.Name }</a></div>
+		 }
+	  </body>
+	</html>
 }
 
 templ cardComponent(title string, body templ.Component) {
@@ -17,7 +30,7 @@ templ indexPage(index *Index) {
 		@headerComponent(index.Title)
 		<body>
 			for _, list := range *index.Lists {
-				<h1>{ list.Name }</h1>
+				<div><a href={ templ.SafeURL(slug.Make(list.List.Name)) }><h1>{ list.List.Name }</h1></a></div>
 			}
 		</body>
 	</html>

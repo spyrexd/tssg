@@ -15,7 +15,15 @@ type Renderer interface {
 }
 
 type List struct {
-	*tc.List
+	List  *tc.List
+	Cards *[]Card
+}
+
+func (l *List) Render(writer io.Writer) error {
+	if err := listComponent(l).Render(context.Background(), writer); err != nil {
+		return err
+	}
+	return nil
 }
 
 type Card struct {

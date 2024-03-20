@@ -45,23 +45,19 @@ func (c *TrelloClient) GetBoardLists(boardId string) (*[]components.List, error)
 	}
 
 	componentLists := make([]components.List, len(boardLists))
-	for idx, item := range boardLists {
-		componentLists[idx] = components.List{item}
+	for boardIdx, item := range boardLists {
+		cards, err := item.GetCards(tc.Defaults())
+		if err != nil {
+			return nil, err
+		}
+
+		componentCards := make([]components.Card, len(cards))
+		for cardIdx, card := range cards {
+			componentCards[cardIdx] = components.Card{card}
+		}
+
+		componentLists[boardIdx] = components.List{List: item, Cards: &componentCards}
 	}
 
 	return &componentLists, nil
-}
-
-func (c *TrelloClient) GetCards(list components.List) (*[]components.Card, error) {
-	cards, err := list.GetCards(tc.Defaults())
-	if err != nil {
-		return nil, err
-	}
-
-	componentCards := make([]components.Card, len(cards))
-	for idx, card := range cards {
-		componentCards[idx] = components.Card{card}
-	}
-
-	return &componentCards, nil
 }

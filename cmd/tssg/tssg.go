@@ -47,18 +47,20 @@ func main() {
 	}
 
 	for _, list := range *lists {
-		listSlug := slug.Make(list.Name)
+		listSlug := slug.Make(list.List.Name)
 		listPath := path.Join(rootPath, listSlug)
 		if err := os.MkdirAll(listPath, 0755); err != nil {
 			log.Fatalf("failed to create output direcroty %v", err)
 		}
 
-		cards, err := trelloClient.GetCards(list)
+		listIndexPath := path.Join(listPath, "index.html")
+		listIndex, err := os.OpenFile(listIndexPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Fatalf("Unable to get cards: %v", err)
+			log.Fatalf("faild to create file: %v", err)
 		}
+		list.Render(listIndex)
 
-		for _, card := range *cards {
+		for _, card := range *list.Cards {
 			cardSlug := slug.Make(card.Name)
 			cardPath := path.Join(listPath, fmt.Sprintf("%s.html", cardSlug))
 			page, err := os.OpenFile(cardPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
