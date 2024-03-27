@@ -1,10 +1,27 @@
 package trello
 
 import (
+	"bytes"
+
 	tc "github.com/adlio/trello"
-	"github.com/spyrexd/tssg/internal/components"
 	"github.com/spyrexd/tssg/internal/config"
+	"github.com/yuin/goldmark"
 )
+
+type List struct {
+	List  *tc.List
+	Cards *[]Card
+}
+
+type Card tc.Card
+
+func (c *Card) DescAsHtml() (string, error) {
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(c.Desc), &buf); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
 
 type TrelloClient struct {
 	client tc.Client
@@ -33,7 +50,7 @@ func (c *TrelloClient) GetBoardIdByName(boardName string) (string, error) {
 	return "", nil
 }
 
-func (c *TrelloClient) GetBoardLists(boardId string) (*[]components.List, error) {
+func (c *TrelloClient) GetBoardLists(boardId string) (*[]List, error) {
 	board, err := c.client.GetBoard(boardId, tc.Defaults())
 	if err != nil {
 		return nil, err
@@ -44,20 +61,20 @@ func (c *TrelloClient) GetBoardLists(boardId string) (*[]components.List, error)
 		return nil, err
 	}
 
-	componentLists := make([]components.List, len(boardLists))
+	lists := make([]List, len(boardLists))
 	for boardIdx, item := range boardLists {
-		cards, err := item.GetCards(tc.Defaults())
+		listCards, err := item.GetCards(tc.Defaults())
 		if err != nil {
 			return nil, err
 		}
 
-		componentCards := make([]components.Card, len(cards))
-		for cardIdx, card := range cards {
-			componentCards[cardIdx] = components.Card{card}
+		cards := make([]Card, len(listCards))
+		for cardIdx, card := range listCards {
+			cards[cardIdx] = Card(*card)
 		}
 
-		componentLists[boardIdx] = components.List{List: item, Cards: &componentCards}
+		lists[boardIdx] = List{List: item, Cards: &cards}
 	}
 
-	return &componentLists, nil
+	return &lists, nil
 }

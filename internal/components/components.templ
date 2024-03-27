@@ -2,12 +2,13 @@ package components
 
 import "github.com/gosimple/slug"
 import "fmt"
+import "github.com/spyrexd/tssg/internal/trello"
 
 templ headerComponent(title string) {
 	<head><title>{title}</title></head>
 }
 
-templ listComponent(list *List) {
+templ ListComponent(list trello.List) {
 	<html>
 	  @headerComponent(list.List.Name)
 	  <body>
