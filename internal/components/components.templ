@@ -42,6 +42,17 @@ templ cardPage(page *CardPage, body templ.Component) {
 		@headerComponent(page.Title)
 		<body>
 		@cardComponent(page.Title, body)
+		if len(*page.Attachments) > 0 {
+			for _, attach := range *page.Attachments {
+				@cardImageComponent(fmt.Sprintf("images/%s", attach.Name))
+			}
+		}
 		</body>
 	</html>
+}
+
+templ cardImageComponent(imagePath string) {
+	<div>
+	  <image src={ imagePath }></image>
+	</div>
 }

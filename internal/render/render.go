@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 
+	tc "github.com/adlio/trello"
 	"github.com/gosimple/slug"
 	"github.com/spyrexd/tssg/internal/components"
 	"github.com/spyrexd/tssg/internal/trello"
@@ -20,7 +21,12 @@ func renderList(list trello.List, writer io.Writer) error {
 	return nil
 }
 
-func Render(lists *[]trello.List) error {
+func Render(boardId string, client *tc.Client) error {
+
+	lists, err := trello.GetBoardLists(boardId, client)
+	if err != nil {
+		log.Fatalf("unable to get board items %v", err)
+	}
 
 	rootPath := "public"
 	if err := os.MkdirAll(rootPath, 0755); err != nil {
@@ -61,9 +67,39 @@ func Render(lists *[]trello.List) error {
 				log.Fatalf("faild to create file: %v", err)
 			}
 
-			cardPage := components.CardPage{Title: card.Name, Card: card}
+			attachments, err := card.GetAttachments()
+			if err != nil {
+				log.Fatalf("failed to render page: %v", err)
+			}
+			if len(*attachments) > 0 {
+				imagePath := path.Join(listPath, "images")
+				if err := os.MkdirAll(imagePath, 0755); err != nil {
+					log.Fatalf("failed to render page: %v", err)
+				}
+				for _, attachment := range *attachments {
+					imageName := attachment.Name
+					imageFilePath := path.Join(imagePath, imageName)
+
+					reader, err := trello.GetAttachment(attachment.URL, client)
+					if err != nil {
+						return err
+					}
+
+					out, err := os.Create(imageFilePath)
+					if err != nil {
+						log.Fatalf("failed to render page: %v", err)
+					}
+					_, err = io.Copy(out, reader)
+					if err != nil {
+						log.Fatalf("failed to render page: %v", err)
+					}
+					out.Close()
+				}
+			}
+
+			cardPage := components.CardPage{Title: card.Name, Card: card, Attachments: attachments}
 			if err := cardPage.Render(page); err != nil {
-				log.Fatalf("failed to redner page: %v", err)
+				log.Fatalf("failed to revder page: %v", err)
 			}
 		}
 	}

@@ -22,8 +22,9 @@ func (idx *Index) Render(writer io.Writer) error {
 }
 
 type CardPage struct {
-	Title string
-	Card  trello.Card
+	Title       string
+	Card        trello.Card
+	Attachments *[]*trello.Attachment
 }
 
 func (c *CardPage) Render(writer io.Writer) error {
@@ -32,6 +33,7 @@ func (c *CardPage) Render(writer io.Writer) error {
 		return err
 
 	}
+
 	body := unsafe(descHtml)
 	err = cardPage(c, body).Render(context.Background(), writer)
 	if err != nil {
